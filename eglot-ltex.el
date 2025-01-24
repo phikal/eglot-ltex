@@ -90,13 +90,13 @@ This file is use to activate the language server."
 	program-basename
 	(expand-file-name "bin" eglot-ltex-server-path)))
       ("" (executable-find program-basename))
-      (_ (user-error "eglot-ltex-server-path is invalid or points to a nonexistant file: " eglot-ltex-server-path)))))
+      (_ (error "eglot-ltex-server-path is invalid or points to a nonexistant file: " eglot-ltex-server-path)))))
 
 (defun eglot-ltex--server-program (_interactive _project)
   (pcase eglot-ltex-communication-channel
     ('stdio `(,(eglot-ltex--server-entry)))
     ('tcp `(,(eglot-ltex--server-entry) "--server-type" "TcpSocket" "--port" :autoport))
-    (_ (user-error "Invalid communication channel type: %s" eglot-ltex-communication-channel))))
+    (_ (error "Invalid communication channel type: %s" eglot-ltex-communication-channel))))
 
 (add-to-list 'eglot-server-programs
              `(,eglot-ltex-active-modes . eglot-ltex--server-program))
