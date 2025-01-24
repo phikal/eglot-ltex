@@ -80,17 +80,20 @@ https://github.com/valentjn/ltex-ls"
   "Return the server entry file.
 
 This file is use to activate the language server."
-  (let ((program-basename (if (eq system-type 'windows-nt)
-                               "ltex-ls.bat"
-                            "ltex-ls")))
-    (pcase eglot-ltex-server-path
-      ((pred file-regular-p) eglot-ltex-server-path)
-      ((pred file-directory-p)
-       (expand-file-name
-	program-basename
-	(expand-file-name "bin" eglot-ltex-server-path)))
-      ("" (executable-find program-basename))
-      (_ (error "eglot-ltex-server-path is invalid or points to a nonexistant file: " eglot-ltex-server-path)))))
+  (let ((program-basenames '("ltex-ls" "ltex-ls-plus")))
+    (or (pcase eglot-ltex-server-path
+          ((pred file-regular-p) eglot-ltex-server-path)
+          ((pred file-directory-p)
+           (cl-loop with bin = (expand-file-name "bin" eglot-ltex-server-path)
+                    for filename in program-basenames
+                    when (locate-file filename (list bin)
+                                      (list "" ".bat")
+                                      #'file-executable-p)
+                    return it))
+          (_ (cl-loop for filename in program-basenames
+                      when (executable-find filename)
+                      return it)))
+        (error "eglot-ltex-server-path is invalid or points to a nonexistant file: %s" eglot-ltex-server-path))))
 
 (defun eglot-ltex--server-program (_interactive _project)
   (pcase eglot-ltex-communication-channel
