@@ -6,7 +6,7 @@
 ;; Author: Shen, Jen-Chieh <jcs090218@gmail.com>
 ;; URL: https://github.com/emacs-languagetool/eglot-ltex
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "24.3") (eglot "1.4") (f "0.20.0"))
+;; Package-Requires: ((emacs "24.3") (eglot "1.4"))
 ;; Keywords: convenience eglot languagetool checker
 
 ;; This file is NOT part of GNU Emacs.
@@ -34,7 +34,6 @@
 (require 'cl-lib)
 
 (require 'eglot)
-(require 'f)
 
 (defgroup eglot-ltex nil
   "Settings for the LTEX Language Server.
@@ -85,8 +84,11 @@ This file is use to activate the language server."
                                "ltex-ls.bat"
                             "ltex-ls")))
     (pcase eglot-ltex-server-path
-      ((pred f-file?) eglot-ltex-server-path)
-      ((pred f-dir?) (f-join eglot-ltex-server-path "bin" program-basename))
+      ((pred file-regular-p) eglot-ltex-server-path)
+      ((pred file-directory-p)
+       (expand-file-name
+	program-basename
+	(expand-file-name "bin" eglot-ltex-server-path)))
       ("" (executable-find program-basename))
       (_ (user-error "eglot-ltex-server-path is invalid or points to a nonexistant file: " eglot-ltex-server-path)))))
 
