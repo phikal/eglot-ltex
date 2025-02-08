@@ -64,9 +64,12 @@ https://github.com/valentjn/ltex-ls"
   "List of major mode that work with LanguageTool."
   :type '(alist :key-type symbol :valye-type plist))
 
-(defcustom eglot-ltex-server-path ""
-  "The root path of the LTEX language server's folder, or path to the executable."
-  :type 'string)
+(defcustom eglot-ltex-server-path nil
+  "The root path of the LTEX language server's folder, or path to the executable.
+If nil, try to find the executable in PATH."
+  :type '(choice (const :tag "Find in $PATH" nil)
+		 (file :tag "Direct path to a LTEX executable" :must-match t)
+		 (directory :tag "LTEX checkout with a bin/ and lib/ directory")))
 
 (defcustom eglot-ltex-communication-channel 'stdio
   "Type of the communication channel."
@@ -78,7 +81,7 @@ https://github.com/valentjn/ltex-ls"
 
 This file is use to activate the language server."
   (let ((program-basenames '("ltex-ls" "ltex-ls-plus")))
-    (or (pcase eglot-ltex-server-path
+    (or (pcase-exhaustive eglot-ltex-server-path
           ((pred file-regular-p) eglot-ltex-server-path)
           ((pred file-directory-p)
            (cl-loop with bin = (expand-file-name "bin" eglot-ltex-server-path)
@@ -87,9 +90,10 @@ This file is use to activate the language server."
                                       (list "" ".bat")
                                       #'file-executable-p)
                     return it))
-          (_ (cl-loop for filename in program-basenames
-                      when (executable-find filename)
-                      return it)))
+          ((pred null)
+	   (cl-loop for filename in program-basenames
+		    when (executable-find filename)
+		    return it)))
         (error "eglot-ltex-server-path is invalid or points to a nonexistant file: %s" eglot-ltex-server-path))))
 
 (defun eglot-ltex--server-program (&optional _interactive _project)
