@@ -62,19 +62,16 @@ https://github.com/valentjn/ltex-ls"
     (rst-mode :language-id "restructuredtext")
     (text-mode :language-id "plaintext"))
   "List of major mode that work with LanguageTool."
-  :type '(alist :key-type symbol :valye-type plist)
-  :group 'eglot-ltex)
+  :type '(alist :key-type symbol :valye-type plist))
 
 (defcustom eglot-ltex-server-path ""
   "The root path of the LTEX language server's folder, or path to the executable."
-  :type 'string
-  :group 'eglot-ltex)
+  :type 'string)
 
 (defcustom eglot-ltex-communication-channel 'stdio
   "Type of the communication channel."
   :type '(choice (const :tag "Standard IO" stdio)
-                 (const :tag "TCP/socket" tcp))
-  :group 'eglot-ltex)
+                 (const :tag "TCP/socket" tcp)))
 
 (defun eglot-ltex--server-entry ()
   "Return the server entry file.
@@ -102,7 +99,7 @@ This file is use to activate the language server."
     (_ (error "Invalid communication channel type: %s" eglot-ltex-communication-channel))))
 
 (add-to-list 'eglot-server-programs
-             `(,eglot-ltex-active-modes . eglot-ltex--server-program))
+             (cons eglot-ltex-active-modes #'eglot-ltex--server-program))
 
 (provide 'eglot-ltex)
 ;;; eglot-ltex.el ends here
